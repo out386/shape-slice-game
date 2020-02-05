@@ -12,6 +12,8 @@ import android.graphics.Color;
 import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.Region;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -20,8 +22,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /*
  * View of the main game area.
@@ -29,23 +29,26 @@ import java.util.TimerTask;
  */
 @SuppressLint("ViewConstructor")
 public class MainView extends View implements Observer {
-    public int notiTimes = 0;
-    public int fails = 0;
+    private int addFruitInterval = (int) (Math.random() * 1000 + 1500);
+    private long lastFruitAddedTime = 0;
+    private Handler handler;
+
+    public int fails;
     private final Model model;
     private final MouseDrag drag = new MouseDrag();
-    public Timer drawer;
-    public Timer creator;
     public Context viewContext;
 
     public boolean addCuts = false;
-    public int toAdd = 0;
+    public int toAdd = 2;
     public ArrayList<Fruit> newFruits = new ArrayList();
+    private AlertDialog dialog;
 
     // Constructor
     @SuppressLint("ClickableViewAccessibility")
     MainView(Context context, Model m) {
         super(context);
         viewContext = context;
+        handler = new Handler();
         // register this view with the model
         model = m;
         model.addObserver(this);
@@ -84,6 +87,19 @@ public class MainView extends View implements Observer {
         });
     }
 
+    public void init() {
+        lastFruitAddedTime = 0;
+        fails = 0;
+        model.clear();
+        drag.reset();
+        addCuts = false;
+        toAdd = 2;
+        newFruits = new ArrayList<>();
+        setBackgroundColor(Color.WHITE);
+        invalidate();
+        handler.post(new DrawRunnable());
+    }
+
     // inner class to track mouse drag
     // a better solution *might* be to dynamically track touch movement
     // in the controller above
@@ -108,14 +124,15 @@ public class MainView extends View implements Observer {
             this.endx = x;
             this.endy = y;
         }
+
+        void reset() {
+            startx = starty = endx = endy = 0;
+        }
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-
-        // draw background
-        setBackgroundColor(Color.WHITE);
 
         // draw all pieces of fruit
         for (Fruit s : model.getShapes()) {
@@ -125,107 +142,82 @@ public class MainView extends View implements Observer {
 
     @Override
     public void update(Observable observable, Object data) {
-        invalidate();
+        //invalidate();
     }
 
-    class MyDrawTask extends TimerTask {
+    class DrawRunnable implements Runnable {
         @Override
         public void run() {
-            ((Activity) viewContext).runOnUiThread(() -> {
+            for (Iterator<Fruit> it = model.shapes.iterator(); it.hasNext(); ) {
+                Fruit temp = it.next();
+                Region tempRegion = new Region();
+                Region clip = new Region(0, 0, 480, 800);
+                tempRegion.setPath(temp.getTransformedPath(), clip);
 
-                notiTimes++;
-                if (notiTimes >= 60) {
-                    model.timePassed++;
-                    notiTimes = 0;
-                }
+                temp.translate(temp.speedx, temp.speedy);
+                temp.speedx += temp.accx;
+                temp.speedy += temp.accy;
 
-                for (Iterator<Fruit> it = model.shapes.iterator(); it.hasNext(); ) {
-                    Fruit temp = it.next();
-                    Region tempRegion = new Region();
-                    Region clip = new Region(0, 0, 480, 800);
-                    tempRegion.setPath(temp.getTransformedPath(), clip);
-
-                    temp.translate(temp.speedx, temp.speedy);
-                    temp.speedx += temp.accx;
-                    temp.speedy += temp.accy;
-
-                    if (tempRegion.getBounds().top > 800 - 135) {
-                        if (!temp.part) {
-                            fails++;
-                            //Log.d("fails", String.valueOf(fails));
-                            if (fails >= 5) {
-                                //failed or time up(restart)
-
-                                model.score = 0;
-                                model.timePassed = 0;
-
-                                drawer.cancel();  // Terminates this timer, discarding any currently scheduled tasks.
-                                drawer.purge();
-
-                                creator.cancel();
-                                creator.purge();
-
-                                newFruits.clear();
-                                model.shapes.clear();
-                                fails = 0;
-                                //fail text
-                                AlertDialog.Builder dialogBuilder =
-                                        new AlertDialog.Builder(viewContext);
-                                dialogBuilder.setMessage("restart");
-                                dialogBuilder.setPositiveButton("Yes", (dialog, which) -> init());
-
-                                dialogBuilder.setNegativeButton("Noo", (dialog, which) ->
-                                        ((Activity) viewContext).finish());
-
-                                dialogBuilder.create().show();
-                                break;
-                            }
+                if (tempRegion.getBounds().top > 800 - 135) {
+                    if (!temp.part) {
+                        fails++;
+                        if (fails >= 5) {
+                            // Not bothering to clean up here as init() will do it soon anyway
+                            showDialog();
+                            return;
                         }
-                        it.remove();
-                    } else if (temp.cutted) {
-                        if (!temp.part) {
-                            model.score++;
-                        }
-                        it.remove();
-                        model.notifyObservers();
                     }
-                }
-
-                while (toAdd > 0) {
-                    toAdd--;
-                    addFruit();
-                }
-
-                if (addCuts) {
-                    for (Fruit f : newFruits) {
-                        model.add(f);
+                    it.remove();
+                } else if (temp.cutted) {
+                    if (!temp.part) {
+                        model.score++;
                     }
-                    addCuts = false;
-                    newFruits.clear();
+                    it.remove();
+                    model.notifyObservers();
                 }
-                invalidate();
-            });
+            }
+
+            setShouldAddFruit();
+            while (toAdd > 0) {
+                toAdd--;
+                addFruit();
+            }
+
+            if (addCuts) {
+                for (Fruit f : newFruits) {
+                    model.add(f);
+                }
+                addCuts = false;
+                newFruits.clear();
+            }
+            invalidate();
+            handler.postDelayed(this, 16);
         }
     }
 
-    int penInterval = (int) (Math.random() * 1000 + 1500);
-
-    class MyCreateTask extends TimerTask {
-        @Override
-        public void run() {
-            ((Activity) viewContext).runOnUiThread(() -> {
-                toAdd = (int) (Math.random() * 2 + 1);
-                penInterval = (int) (Math.random() * 1000 + 1500);
-            });
+    private void setShouldAddFruit() {
+        long currentTime = SystemClock.uptimeMillis();
+        long nextAddTime = lastFruitAddedTime + addFruitInterval;
+        if (currentTime >= nextAddTime) {
+            lastFruitAddedTime = currentTime;
+            toAdd = (int) (Math.random() * 2 + 1);
+            addFruitInterval = (int) (Math.random() * 1000 + 1500);
         }
     }
 
-    public void init() {
-        drawer = new Timer();
-        creator = new Timer();
-        drawer.scheduleAtFixedRate(new MyDrawTask(), 1000, 1000 / 20);
-        creator.scheduleAtFixedRate(new MyCreateTask(), 1000, penInterval);
+    private void showDialog() {
+        if (dialog == null) {
+            AlertDialog.Builder dialogBuilder =
+                    new AlertDialog.Builder(viewContext);
+            dialogBuilder.setMessage("Restart?");
+            dialogBuilder.setPositiveButton("Yes", (dialog, which) -> init());
 
+            dialogBuilder.setNegativeButton("No", (dialog, which) ->
+                    ((Activity) viewContext).finish());
+
+            dialog = dialogBuilder.create();
+        }
+        dialog.show();
     }
 
     private void addFruit() {

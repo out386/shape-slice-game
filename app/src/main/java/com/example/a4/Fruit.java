@@ -182,7 +182,6 @@ public class Fruit {
         Region clip = new Region(0, 0, 480, 800);
         tempRegion.setPath(getTransformedPath(), clip);
 
-
         canvas.drawPath(getTransformedPath(), paint);
     }
 

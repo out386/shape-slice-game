@@ -16,13 +16,19 @@ import java.util.Observer;
  */
 public class Model extends Observable {
     // List of fruit that we want to display
-    ArrayList<Fruit> shapes = new ArrayList<>();
-    int timePassed = 0;
-    int score = 0;
+    ArrayList<Fruit> shapes;
+    int score;
 
     // Constructor
     Model() {
-        shapes.clear();
+        shapes = new ArrayList<>();
+        score = 0;
+    }
+
+    void clear() {
+        shapes = new ArrayList<>();
+        score = 0;
+        initObservers();
     }
 
     // Model methods
