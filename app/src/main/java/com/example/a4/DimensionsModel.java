@@ -5,15 +5,14 @@ class DimensionsModel {
     private int viewH;
     private int failThres;
     private float addY;
-    private float addXConst;
     private float pathRadius;
+    private float density;
 
     DimensionsModel(int viewW, int viewH, float density) {
         this.viewW = viewW;
         this.viewH = viewH;
+        this.density = density;
         addY = viewH * (3 / 4f); // Bottom 1/4th of the screen
-        float edgeGap = 100 * density;
-        addXConst = edgeGap + (viewW - 2 * edgeGap);
         pathRadius = 20 * density;
         failThres = viewH - (int) pathRadius;
     }
@@ -30,12 +29,16 @@ class DimensionsModel {
         return failThres;
     }
 
+    float getDensity() {
+        return density;
+    }
+
     float getAddY() {
         return addY;
     }
 
     float getAddX() {
-        return (float) (Math.random() * addXConst);
+        return (float) (Math.random() * viewW);
     }
 
     float getPathRadius() {

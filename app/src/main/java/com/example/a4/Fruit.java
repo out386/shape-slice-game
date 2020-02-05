@@ -5,7 +5,6 @@
  */
 package com.example.a4;
 
-import android.annotation.SuppressLint;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -34,36 +33,8 @@ public class Fruit {
     /**
      * A fruit is represented as Path, typically populated by a series of points
      */
-    Fruit(float[] points) {
-        init();
 
-        counter++;
-        this.part = false;
-        this.index = counter;
-
-        this.path.reset();
-        this.path.moveTo(points[0], points[1]);
-        for (int i = 2; i < points.length; i += 2) {
-            this.path.lineTo(points[i], points[i + 1]);
-        }
-        this.path.moveTo(points[0], points[1]);
-
-        this.speedx = (float) (Math.random() * 6 - 3);
-
-        this.speedy = (float) -(Math.random() * 10 + 15);
-
-        this.accx = 0;
-        this.accy = (float) 0.2;
-        this.belowLine = false;
-        this.cutted = false;
-    }
-
-    Fruit(Region region) {
-        init();
-        this.path = region.getBoundaryPath();
-    }
-
-    Fruit(Path path) {
+    Fruit(Path path, DimensionsModel dimens) {
         init();
 
         counter++;
@@ -73,17 +44,17 @@ public class Fruit {
         this.path.reset();
         this.path = path;
 
-        this.speedx = (float) (Math.random() * 6 + -3);
+        float density = dimens.getDensity();
+        this.speedx = (float) (Math.random() * 7 - 4) * density;
 
-        this.speedy = (float) -(Math.random() * 5 + 7);
-
+        this.speedy = (float) -(Math.random() * 7 + 12) * density;
         this.accx = 0;
-        this.accy = (float) 0.2;
+        this.accy = (float) 0.45 * density;
         this.belowLine = false;
         this.cutted = false;
     }
 
-    private Fruit(Path path, float sx, float sy) {
+    private Fruit(Path path, float sx, float sy, DimensionsModel dimens) {
         init();
 
         counter++;
@@ -98,7 +69,7 @@ public class Fruit {
         this.speedy = sy;
 
         this.accx = 0;
-        this.accy = (float) 0.2;
+        this.accy = (float) 0.45 * dimens.getDensity();
         this.belowLine = false;
         this.cutted = false;
     }
@@ -119,48 +90,12 @@ public class Fruit {
         return result;
     }
 
-    /**
-     * The color used to paint the interior of the Fruit.
-     */
-    public int getFillColor() {
-        return paint.getColor();
-    }
-
     void setFillColor(int color) {
         paint.setColor(color);
     }
 
-    /**
-     * The width of the outline stroke used when painting.
-     */
-    public double getOutlineWidth() {
-        return paint.getStrokeWidth();
-    }
-
-    public void setOutlineWidth(float newWidth) {
-        paint.setStrokeWidth(newWidth);
-    }
-
-    /**
-     * Concatenates transforms to the Fruit's affine transform
-     */
-    public void rotate(float theta) {
-        transform.postRotate(theta);
-    }
-
-    public void scale(float x, float y) {
-        transform.postScale(x, y);
-    }
-
     void translate(float tx, float ty) {
         transform.postTranslate(tx, ty);
-    }
-
-    /**
-     * Returns the Fruit's affine transform that is used when painting
-     */
-    public Matrix getTransform() {
-        return transform;
     }
 
     /**
@@ -222,7 +157,6 @@ public class Fruit {
      * unpredictable results will occur. Returns two new Fruits, split by the line represented by
      * the two points given.
      */
-    @SuppressLint("NewApi")
     Fruit[] split(PointF p1, PointF p2, DimensionsModel dimens) {
 
         float xLength = Math.abs(p1.x - p2.x);
@@ -293,7 +227,8 @@ public class Fruit {
         Path rightPath = rightRegion.getBoundaryPath();
 
         if (resultl && resultr) {
-            return new Fruit[]{new Fruit(leftPath, -2, this.speedy), new Fruit(rightPath, 2, this.speedy)};
+            return new Fruit[]{new Fruit(leftPath, -2, this.speedy, dimens),
+                    new Fruit(rightPath, 2, this.speedy, dimens)};
         }
         return new Fruit[0];
     }

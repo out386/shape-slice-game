@@ -238,7 +238,7 @@ public class MainView extends View {
             Path newPath = new Path();
             newPath.addCircle(dimens.getAddX(), dimens.getAddY(), dimens.getPathRadius(),
                     Path.Direction.CCW);
-            Fruit f = new Fruit(newPath);
+            Fruit f = new Fruit(newPath, dimens);
             model.add(f);
         }
     }
