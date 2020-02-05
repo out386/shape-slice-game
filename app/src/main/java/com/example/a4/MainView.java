@@ -17,6 +17,7 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
 
 import androidx.annotation.Nullable;
 
@@ -96,6 +97,7 @@ public class MainView extends View {
         addCuts = false;
         toAdd = 2;
         newFruits = new ArrayList<>();
+        goFullscreen(((Activity) viewContext).getWindow());
         setBackgroundColor(Color.WHITE);
         invalidate();
         if (dimens != null) {
@@ -237,7 +239,18 @@ public class MainView extends View {
                 ((Activity) viewContext).finish());
 
         AlertDialog dialog = dialogBuilder.create();
+        goFullscreen(dialog.getWindow());
         dialog.show();
+    }
+
+    private void goFullscreen(Window w) {
+        if (w != null) {
+            w.getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+            );
+        }
     }
 
     private void addFruit() {
