@@ -48,7 +48,7 @@ public class Fruit {
         }
         this.path.moveTo(points[0], points[1]);
 
-        this.speedx = (float) (Math.random() * 6 + -3);
+        this.speedx = (float) (Math.random() * 6 - 3);
 
         this.speedy = (float) -(Math.random() * 10 + 15);
 
@@ -177,9 +177,9 @@ public class Fruit {
      * Paints the Fruit to the screen using its current affine transform and paint settings (fill,
      * outline)
      */
-    void draw(Canvas canvas) {
+    void draw(Canvas canvas, DimensionsModel dimens) {
         Region tempRegion = new Region();
-        Region clip = new Region(0, 0, 480, 800);
+        Region clip = new Region(0, 0, dimens.getW(), dimens.getH());
         tempRegion.setPath(getTransformedPath(), clip);
 
         canvas.drawPath(getTransformedPath(), paint);
@@ -188,9 +188,9 @@ public class Fruit {
     /**
      * Tests whether the line represented by the two points intersects this Fruit.
      */
-    boolean intersects(PointF p1, PointF p2) {
+    boolean intersects(PointF p1, PointF p2, DimensionsModel dimens) {
         Region fruitRegion = new Region();
-        Region clip = new Region(0, 0, 480, 800);
+        Region clip = new Region(0, 0, dimens.getW(), dimens.getH());
         fruitRegion.setPath(getTransformedPath(), clip);
 
         Path cut = new Path();
@@ -210,9 +210,9 @@ public class Fruit {
     /**
      * Returns whether the given point is within the Fruit's shape.
      */
-    public boolean contains(PointF p1) {
+    public boolean contains(PointF p1, DimensionsModel dimens) {
         Region region = new Region();
-        Region clip = new Region(0, 0, 480, 800);
+        Region clip = new Region(0, 0, dimens.getW(), dimens.getH());
         boolean valid = region.setPath(getTransformedPath(), clip);
         return valid && region.contains((int) p1.x, (int) p1.y);
     }
@@ -223,7 +223,7 @@ public class Fruit {
      * the two points given.
      */
     @SuppressLint("NewApi")
-    Fruit[] split(PointF p1, PointF p2) {
+    Fruit[] split(PointF p1, PointF p2, DimensionsModel dimens) {
 
         float xLength = Math.abs(p1.x - p2.x);
         float yLength = Math.abs(p1.y - p2.y);
@@ -276,7 +276,7 @@ public class Fruit {
             rightCoverPath = makePath(xr, yr);
         }
 
-        Region clip = new Region(0, 0, 480, 800);
+        Region clip = new Region(0, 0, dimens.getW(), dimens.getH());
         Region leftRegion = new Region();
         Region rightRegion = new Region();
 

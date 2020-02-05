@@ -17,21 +17,23 @@ import android.os.SystemClock;
 import android.view.MotionEvent;
 import android.view.View;
 
+import androidx.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.Observable;
-import java.util.Observer;
 
 /*
  * View of the main game area.
  * Displays pieces of fruit, and allows players to slice them.
  */
 @SuppressLint("ViewConstructor")
-public class MainView extends View implements Observer {
+public class MainView extends View {
     private int addFruitInterval = (int) (Math.random() * 1000 + 1500);
     private long lastFruitAddedTime = 0;
     private Handler handler;
+    @Nullable
+    private DimensionsModel dimens;
 
     public int fails;
     private final Model model;
@@ -41,7 +43,7 @@ public class MainView extends View implements Observer {
     public boolean addCuts = false;
     public int toAdd = 2;
     public ArrayList<Fruit> newFruits = new ArrayList();
-    private AlertDialog dialog;
+    private DrawRunnable drawRunnable;
 
     // Constructor
     @SuppressLint("ClickableViewAccessibility")
@@ -51,9 +53,10 @@ public class MainView extends View implements Observer {
         handler = new Handler();
         // register this view with the model
         model = m;
-        model.addObserver(this);
 
         setOnTouchListener((v, event) -> {
+            if (dimens == null)
+                return true;
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     drag.start(event.getX(), event.getY());
@@ -61,25 +64,22 @@ public class MainView extends View implements Observer {
 
                 case MotionEvent.ACTION_UP:
                     drag.stop(event.getX(), event.getY());
-
                     // find intersected shapes
                     for (Fruit s : model.getShapes()) {
-                        if (s.intersects(drag.getStart(), drag.getEnd())) {
+                        if (s.intersects(drag.getStart(), drag.getEnd(), dimens)) {
                             s.setFillColor(Color.RED);
 
                             try {
-                                Fruit[] goingAL = s.split(drag.getStart(), drag.getEnd());
+                                Fruit[] goingAL = s.split(drag.getStart(), drag.getEnd(), dimens);
                                 newFruits.addAll(Arrays.asList(goingAL));
                                 s.cutted = true;
                                 addCuts = true;
 
-                            } catch (Exception ex) {
-                                //Log.e("fruit_ninja", "Error: " + ex.getMessage());
+                            } catch (Exception ignored) {
                             }
                         } else {
                             s.setFillColor(Color.BLUE);
                         }
-                        invalidate();
                     }
                     break;
             }
@@ -97,7 +97,21 @@ public class MainView extends View implements Observer {
         newFruits = new ArrayList<>();
         setBackgroundColor(Color.WHITE);
         invalidate();
-        handler.post(new DrawRunnable());
+        if (dimens != null) {
+            if (drawRunnable == null)
+                drawRunnable = new DrawRunnable();
+            handler.post(drawRunnable);
+        }
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        dimens = new DimensionsModel(w, h, getResources().getDisplayMetrics().density);
+        if (drawRunnable == null) {
+            drawRunnable = new DrawRunnable();
+            handler.post(drawRunnable);
+        }
     }
 
     // inner class to track mouse drag
@@ -133,32 +147,31 @@ public class MainView extends View implements Observer {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        if (dimens == null)
+            return;
 
         // draw all pieces of fruit
         for (Fruit s : model.getShapes()) {
-            s.draw(canvas);
+            s.draw(canvas, dimens);
         }
-    }
-
-    @Override
-    public void update(Observable observable, Object data) {
-        //invalidate();
     }
 
     class DrawRunnable implements Runnable {
         @Override
         public void run() {
             for (Iterator<Fruit> it = model.shapes.iterator(); it.hasNext(); ) {
+                if (dimens == null)
+                    continue;
                 Fruit temp = it.next();
                 Region tempRegion = new Region();
-                Region clip = new Region(0, 0, 480, 800);
+                Region clip = new Region(0, 0, dimens.getW(), dimens.getH());
                 tempRegion.setPath(temp.getTransformedPath(), clip);
 
                 temp.translate(temp.speedx, temp.speedy);
                 temp.speedx += temp.accx;
                 temp.speedy += temp.accy;
 
-                if (tempRegion.getBounds().top > 800 - 135) {
+                if (tempRegion.getBounds().top > dimens.getFailThres()) {
                     if (!temp.part) {
                         fails++;
                         if (fails >= 5) {
@@ -191,6 +204,8 @@ public class MainView extends View implements Observer {
                 newFruits.clear();
             }
             invalidate();
+
+            // '16' will keep the frame rate at or just below 60 FPS
             handler.postDelayed(this, 16);
         }
     }
@@ -206,27 +221,25 @@ public class MainView extends View implements Observer {
     }
 
     private void showDialog() {
-        if (dialog == null) {
-            AlertDialog.Builder dialogBuilder =
-                    new AlertDialog.Builder(viewContext);
-            dialogBuilder.setMessage("Restart?");
-            dialogBuilder.setPositiveButton("Yes", (dialog, which) -> init());
+        AlertDialog.Builder dialogBuilder =
+                new AlertDialog.Builder(viewContext);
+        dialogBuilder.setMessage("Restart?");
+        dialogBuilder.setPositiveButton("Yes", (dialog, which) -> init());
 
-            dialogBuilder.setNegativeButton("No", (dialog, which) ->
-                    ((Activity) viewContext).finish());
+        dialogBuilder.setNegativeButton("No", (dialog, which) ->
+                ((Activity) viewContext).finish());
 
-            dialog = dialogBuilder.create();
-        }
+        AlertDialog dialog = dialogBuilder.create();
         dialog.show();
     }
 
     private void addFruit() {
-        float y = 800 - 135;
-        float x = (float) (Math.random() * 300 + 100);
-        Path newPath = new Path();
-        newPath.addCircle(x, y, 30, Path.Direction.CCW);
-        Fruit f = new Fruit(newPath);
-        model.add(f);
-
+        if (dimens != null) {
+            Path newPath = new Path();
+            newPath.addCircle(dimens.getAddX(), dimens.getAddY(), dimens.getPathRadius(),
+                    Path.Direction.CCW);
+            Fruit f = new Fruit(newPath);
+            model.add(f);
+        }
     }
 }
