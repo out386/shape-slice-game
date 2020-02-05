@@ -9,7 +9,6 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.widget.TextView;
-import com.example.a4complete.R;
 
 import java.util.Observable;
 import java.util.Observer;

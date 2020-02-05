@@ -10,7 +10,6 @@ import android.graphics.Point;
 import android.os.Bundle;
 import android.view.Display;
 import android.view.ViewGroup;
-import com.example.a4complete.R;
 
 public class MainActivity extends Activity {
     private Model model;
