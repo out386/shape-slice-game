@@ -11,6 +11,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Path;
 import android.graphics.PointF;
+import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Handler;
 import android.os.SystemClock;
@@ -167,11 +168,17 @@ public class MainView extends View {
                 Region clip = new Region(0, 0, dimens.getW(), dimens.getH());
                 tempRegion.setPath(temp.getTransformedPath(), clip);
 
+                Rect bounds = tempRegion.getBounds();
+                if (bounds.left < 1 && temp.speedx < 0
+                        || bounds.right > dimens.getFailThresX() && temp.speedx > 0)
+                    temp.speedx *= -1;
+
                 temp.translate(temp.speedx, temp.speedy);
                 temp.speedx += temp.accx;
                 temp.speedy += temp.accy;
 
-                if (tempRegion.getBounds().top > dimens.getFailThres()) {
+
+                if (bounds.bottom > dimens.getFailThresY()) {
                     if (!temp.part) {
                         fails++;
                         if (fails >= 5) {
