@@ -6,9 +6,8 @@
 
     <LinearLayout
             android:id="@+id/main_1"
-            android:layout_width="fill_parent"
-            android:layout_height="235px"
-            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
             android:textAlignment="center"
             android:orientation="horizontal" >
 
@@ -16,9 +15,8 @@
 
     <LinearLayout
         android:id="@+id/main_2"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_weight="1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:orientation="horizontal" >
 
     </LinearLayout>

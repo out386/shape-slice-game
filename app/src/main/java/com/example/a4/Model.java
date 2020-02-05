@@ -1,11 +1,10 @@
-/**
+/*
  * CS349 Winter 2014
  * Assignment 4 Demo Code
  * Jeff Avery & Michael Terry
  */
 package com.example.a4;
 
-import android.util.Log;
 import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
@@ -17,10 +16,10 @@ import java.util.Observer;
  */
 public class Model extends Observable {
     // List of fruit that we want to display
-    public ArrayList<Fruit> shapes = new ArrayList<Fruit>();
-    public int timePassed = 0;
-    public int score = 0;
-    
+    ArrayList<Fruit> shapes = new ArrayList<>();
+    int timePassed = 0;
+    int score = 0;
+
     // Constructor
     Model() {
         shapes.clear();
@@ -29,16 +28,15 @@ public class Model extends Observable {
     // Model methods
     // You may need to add more methods here, depending on required functionality.
     // For instance, this sample makes to effort to discard fruit from the list.
-    public void add(Fruit s) {
+    void add(Fruit s) {
         shapes.add(s);
-
     }
 
     public void remove(Fruit s) {
         shapes.remove(s);
     }
 
-    public ArrayList<Fruit> getShapes() {
+    ArrayList<Fruit> getShapes() {
         return (ArrayList<Fruit>) shapes.clone();
     }
 
@@ -49,7 +47,7 @@ public class Model extends Observable {
     }
 
     // a helper to make it easier to initialize all observers
-    public void initObservers() {
+    void initObservers() {
         setChanged();
         notifyObservers();
     }

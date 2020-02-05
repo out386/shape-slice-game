@@ -1,4 +1,4 @@
-/**
+/*
  * CS349 Winter 2014
  * Assignment 4 Demo Code
  * Jeff Avery
@@ -13,8 +13,6 @@ import android.view.ViewGroup;
 
 public class MainActivity extends Activity {
     private Model model;
-    private MainView mainView;
-    private TitleView titleView;
     public static Point displaySize;
 
     @Override
@@ -39,12 +37,12 @@ public class MainActivity extends Activity {
         super.onPostCreate(savedInstanceState);
 
         // create the views and add them to the main activity
-        titleView = new TitleView(this, model);
-        ViewGroup v1 = (ViewGroup) findViewById(R.id.main_1);
+        TitleView titleView = new TitleView(this, model);
+        ViewGroup v1 = findViewById(R.id.main_1);
         v1.addView(titleView);
 
-        mainView = new MainView(this, model);
-        ViewGroup v2 = (ViewGroup) findViewById(R.id.main_2);
+        MainView mainView = new MainView(this, model);
+        ViewGroup v2 = findViewById(R.id.main_2);
         v2.addView(mainView);
         mainView.init();
 
