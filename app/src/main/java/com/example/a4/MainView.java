@@ -38,7 +38,6 @@ public class MainView extends View {
     @Nullable
     private DimensionsModel dimens;
 
-    public int fails;
     private final Model model;
     private final MouseDrag drag = new MouseDrag();
     public Context viewContext;
@@ -92,7 +91,6 @@ public class MainView extends View {
     public void init() {
         lastFruitAddedTime = 0;
         gameStartTime = SystemClock.uptimeMillis();
-        fails = 0;
         model.clear();
         drag.reset();
         addCuts = false;
@@ -183,8 +181,9 @@ public class MainView extends View {
 
                 if (bounds.bottom > dimens.getFailThresY()) {
                     if (!temp.part) {
-                        fails++;
-                        if (fails >= 5) {
+                        model.life--;
+                        model.notifyObs();
+                        if (model.life <= 0) {
                             // Not bothering to clean up here as init() will do it soon anyway
                             showDialog();
                             return;
@@ -196,7 +195,7 @@ public class MainView extends View {
                         model.score++;
                     }
                     it.remove();
-                    model.notifyObservers();
+                    model.notifyObs();
                 }
             }
 

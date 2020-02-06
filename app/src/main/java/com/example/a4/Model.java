@@ -18,17 +18,25 @@ public class Model extends Observable {
     // List of fruit that we want to display
     ArrayList<Fruit> shapes;
     int score;
+    int life;
 
     // Constructor
     Model() {
         shapes = new ArrayList<>();
         score = 0;
+        life = 5;
     }
 
     void clear() {
         shapes = new ArrayList<>();
         score = 0;
+        life = 5;
         initObservers();
+    }
+
+    void notifyObs() {
+        setChanged();
+        notifyObservers();
     }
 
     // Model methods

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="lifeTint">#D32F2F</color>
+    <color name="scoreText">#0A0A0A</color>
+    <color name="topBg">#EBEBEB</color>
+</resources>

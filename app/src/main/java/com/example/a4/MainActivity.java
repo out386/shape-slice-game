@@ -5,13 +5,21 @@
  */
 package com.example.a4;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RatingBar;
+import android.widget.TextView;
 
-public class MainActivity extends Activity {
+import java.util.Observable;
+import java.util.Observer;
+
+public class MainActivity extends Activity implements Observer {
     private Model model;
+    private TextView scoreView;
+    private RatingBar lifeView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -31,9 +39,10 @@ public class MainActivity extends Activity {
         super.onPostCreate(savedInstanceState);
 
         // create the views and add them to the main activity
-        TitleView titleView = new TitleView(this, model);
-        ViewGroup v1 = findViewById(R.id.main_1);
-        v1.addView(titleView);
+        scoreView = findViewById(R.id.score);
+        lifeView = findViewById(R.id.life);
+        lifeView.setIsIndicator(true);
+        model.addObserver(this);
 
         MainView mainView = new MainView(this, model);
         ViewGroup v2 = findViewById(R.id.main_2);
@@ -43,6 +52,12 @@ public class MainActivity extends Activity {
 
         // notify all views
         model.initObservers();
+    }
 
+    @SuppressLint("SetTextI18n")  // As if I'm planning to ever translate this
+    @Override
+    public void update(Observable o, Object arg) {
+        scoreView.setText("Score: " + model.score);
+        lifeView.setRating(model.life);
     }
 }

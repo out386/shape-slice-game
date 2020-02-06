@@ -1,23 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="fill_parent"
-              android:layout_height="fill_parent"
-              android:orientation="vertical" >
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical">
 
-    <LinearLayout
-            android:id="@+id/main_1"
-            android:layout_width="match_parent"
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:background="@color/topBg">
+
+        <TextView
+            android:id="@+id/score"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAlignment="center"
-            android:orientation="horizontal" >
+            android:textStyle="bold"
+            android:textSize="24sp"
+            android:fontFamily="casual"
+            android:textColor="@color/scoreText"
+            android:layout_centerVertical="true"
+            android:layout_alignParentEnd="true"
+            tools:text="Score: 5" />
 
-    </LinearLayout>
+        <RatingBar
+            android:id="@+id/life"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/RatingBarTheme"
+            android:layout_centerVertical="true"
+            android:numStars="5"
+            android:rating="3"
+            android:stepSize="1" />
+
+    </RelativeLayout>
 
     <LinearLayout
         android:id="@+id/main_2"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="horizontal" >
+        android:orientation="horizontal">
 
     </LinearLayout>
 
