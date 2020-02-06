@@ -97,7 +97,7 @@ public class MainView extends View {
         toAdd = 2;
         newFruits = new ArrayList<>();
         goFullscreen(((Activity) viewContext).getWindow());
-        setBackgroundColor(Color.WHITE);
+        setBackgroundColor(Color.TRANSPARENT);
         invalidate();
         if (dimens != null) {
             if (drawRunnable == null)

@@ -1,35 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/bg"
     android:orientation="vertical">
 
-    <RelativeLayout
+    <ImageView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAlignment="center"
+        android:adjustViewBounds="true"
+        android:src="@drawable/bg"
+        android:layout_centerVertical="true"/>
+
+    <RelativeLayout
+        android:id="@+id/top_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/topBg"
         android:orientation="horizontal"
         android:padding="16dp"
-        android:background="@color/topBg">
+        android:textAlignment="center">
 
         <TextView
             android:id="@+id/score"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textStyle="bold"
-            android:textSize="24sp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
             android:fontFamily="casual"
             android:textColor="@color/scoreText"
-            android:layout_centerVertical="true"
-            android:layout_alignParentEnd="true"
+            android:textSize="24sp"
+            android:textStyle="bold"
             tools:text="Score: 5" />
 
         <RatingBar
             android:id="@+id/life"
+            style="@style/RatingBarTheme"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            style="@style/RatingBarTheme"
             android:layout_centerVertical="true"
             android:numStars="5"
             android:rating="3"
@@ -41,8 +50,9 @@
         android:id="@+id/main_2"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@id/top_view"
         android:orientation="horizontal">
 
     </LinearLayout>
 
-</LinearLayout>
+</RelativeLayout>

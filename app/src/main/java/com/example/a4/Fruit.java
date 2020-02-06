@@ -6,7 +6,6 @@
 package com.example.a4;
 
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -23,7 +22,8 @@ public class Fruit {
      */
     private static final long SCALE_INTERVAL = 10000;
     private static final int MAX_SCALE_FACTOR = 5;
-    private static final int[] COLOURS = {Color.BLUE, Color.GREEN, Color.MAGENTA, Color.DKGRAY};
+    private static final int[] COLOURS = {0xFF961C1C, 0xFF6B1142, 0xFF3F1672, 0xFF171F6F, 0xFF0B3D66,
+            0xFF006064, 0xFF044E41, 0xFF2A5818, 0xFFA54813, 0xFFC06B21, 0xFF83781A};
 
     private Path path = new Path();
     private Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
