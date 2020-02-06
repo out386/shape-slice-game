@@ -12,21 +12,27 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.Region;
+import android.os.SystemClock;
 
 /**
  * Class that represents a Fruit. Can be split into two separate fruits.
  */
 public class Fruit {
-    private static int counter = 0;
-    private int index;
+    /**
+     * Intervals in milliseconds after which speed and acceleration increases
+     */
+    private static final long SCALE_INTERVAL = 10000;
+    private static final int MAX_SCALE_FACTOR = 5;
+    private static final int[] COLOURS = {Color.BLUE, Color.GREEN, Color.MAGENTA, Color.DKGRAY};
+
     private Path path = new Path();
     private Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private Matrix transform = new Matrix();
+    private int paintColour;
     float speedx;
     float speedy;
     float accx;
     float accy;
-    private boolean belowLine;
     boolean part;
     boolean cutted;
 
@@ -34,32 +40,32 @@ public class Fruit {
      * A fruit is represented as Path, typically populated by a series of points
      */
 
-    Fruit(Path path, DimensionsModel dimens) {
+    Fruit(Path path, long gameStartTime, DimensionsModel dimens) {
         init();
 
-        counter++;
         this.part = false;
-        this.index = counter;
 
         this.path.reset();
         this.path = path;
 
+        long scale = (SystemClock.uptimeMillis() - gameStartTime) / SCALE_INTERVAL;
+        scale = Math.min(Math.max(1, scale), MAX_SCALE_FACTOR);
         float density = dimens.getDensity();
-        this.speedx = (float) (Math.random() * 7 - 4) * density;
 
-        this.speedy = (float) -(Math.random() * 7 + 12) * density;
+        this.speedx = (float) (Math.random() * 2 - 1) * density * scale;
+
+        this.speedy = (float) -(Math.random() * 2 + 3) * density * scale;
         this.accx = 0;
-        this.accy = (float) 0.45 * density;
-        this.belowLine = false;
+        this.accy = (float) 0.1125 * density * scale;
         this.cutted = false;
     }
 
-    private Fruit(Path path, float sx, float sy, DimensionsModel dimens) {
-        init();
+    private Fruit(Path path, float sx, float sy, float accy, int colour) {
+        paintColour = colour;
+        this.paint.setColor(colour);
+        this.paint.setStrokeWidth(5);
 
-        counter++;
         this.part = true;
-        this.index = counter;
 
         this.path.reset();
         this.path = path;
@@ -69,13 +75,13 @@ public class Fruit {
         this.speedy = sy;
 
         this.accx = 0;
-        this.accy = (float) 0.45 * dimens.getDensity();
-        this.belowLine = false;
+        this.accy = accy;
         this.cutted = false;
     }
 
     private void init() {
-        this.paint.setColor(Color.BLUE);
+        paintColour = COLOURS[(int) (Math.random() * COLOURS.length)];
+        this.paint.setColor(paintColour);
         this.paint.setStrokeWidth(5);
     }
 
@@ -189,8 +195,8 @@ public class Fruit {
             p2Y -= yPlus;
         }
 
-        Path leftCoverPath = null;
-        Path rightCoverPath = null;
+        Path leftCoverPath;
+        Path rightCoverPath;
 
         if (yLength > xLength) {
             float[] xl = {p1X, p2X, p1X - 200, p2X - 200};
@@ -227,8 +233,8 @@ public class Fruit {
         Path rightPath = rightRegion.getBoundaryPath();
 
         if (resultl && resultr) {
-            return new Fruit[]{new Fruit(leftPath, -2, this.speedy, dimens),
-                    new Fruit(rightPath, 2, this.speedy, dimens)};
+            return new Fruit[]{new Fruit(leftPath, -2, speedy, accy, paintColour),
+                    new Fruit(rightPath, 2, speedy, accy, paintColour)};
         }
         return new Fruit[0];
     }

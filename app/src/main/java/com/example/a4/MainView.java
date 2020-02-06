@@ -33,6 +33,7 @@ import java.util.Iterator;
 public class MainView extends View {
     private int addFruitInterval = (int) (Math.random() * 1000 + 1500);
     private long lastFruitAddedTime = 0;
+    private long gameStartTime;
     private Handler handler;
     @Nullable
     private DimensionsModel dimens;
@@ -55,6 +56,7 @@ public class MainView extends View {
         handler = new Handler();
         // register this view with the model
         model = m;
+        gameStartTime = SystemClock.uptimeMillis();
 
         setOnTouchListener((v, event) -> {
             if (dimens == null)
@@ -79,8 +81,6 @@ public class MainView extends View {
 
                             } catch (Exception ignored) {
                             }
-                        } else {
-                            s.setFillColor(Color.BLUE);
                         }
                     }
                     break;
@@ -91,6 +91,7 @@ public class MainView extends View {
 
     public void init() {
         lastFruitAddedTime = 0;
+        gameStartTime = SystemClock.uptimeMillis();
         fails = 0;
         model.clear();
         drag.reset();
@@ -258,7 +259,7 @@ public class MainView extends View {
             Path newPath = new Path();
             newPath.addCircle(dimens.getAddX(), dimens.getAddY(), dimens.getPathRadius(),
                     Path.Direction.CCW);
-            Fruit f = new Fruit(newPath, dimens);
+            Fruit f = new Fruit(newPath, gameStartTime, dimens);
             model.add(f);
         }
     }

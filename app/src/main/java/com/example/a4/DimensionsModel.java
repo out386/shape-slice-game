@@ -6,7 +6,7 @@ class DimensionsModel {
     private int failThresY;
     private int failThresX;
     private float addY;
-    private float pathRadius;
+    private float basePathRadius;
     private float density;
 
     DimensionsModel(int viewW, int viewH, float density) {
@@ -14,7 +14,7 @@ class DimensionsModel {
         this.viewH = viewH;
         this.density = density;
         addY = viewH * (3 / 4f); // Bottom 1/4th of the screen
-        pathRadius = 20 * density;
+        basePathRadius = 20 * density;
         failThresY = viewH - 1;
         failThresX = viewW - 1;
     }
@@ -48,6 +48,6 @@ class DimensionsModel {
     }
 
     float getPathRadius() {
-        return pathRadius;
+        return basePathRadius + (int) (Math.random() * 6 * density);
     }
 }
