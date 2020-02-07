@@ -2,6 +2,7 @@ package com.example.a4;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -37,9 +38,9 @@ public class RestartActivity extends Activity {
         hScoreTv.setText("Your highscore: " + hscore);
 
         yesButton.setOnClickListener(view -> {
-            setResult(Activity.RESULT_OK);
-            finish();
+            startActivity(new Intent(this,  GameActivity.class));
             overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+            finish();
         });
         noButton.setOnClickListener(view -> {
             setResult(Activity.RESULT_CANCELED);
