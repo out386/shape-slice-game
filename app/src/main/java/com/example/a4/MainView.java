@@ -33,7 +33,7 @@ public class MainView extends View {
 
     private final Model model;
     private final MouseDrag drag = new MouseDrag();
-    public MainActivity activity;
+    public GameActivity activity;
 
     public boolean addCuts = false;
     public ArrayList<Fruit> newFruits = new ArrayList();
@@ -41,7 +41,7 @@ public class MainView extends View {
 
     // Constructor
     @SuppressLint("ClickableViewAccessibility")
-    MainView(MainActivity activity, Model m) {
+    MainView(GameActivity activity, Model m) {
         super(activity);
         this.activity = activity;
         handler = new Handler();

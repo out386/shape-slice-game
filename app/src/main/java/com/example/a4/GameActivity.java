@@ -16,7 +16,7 @@ import android.widget.TextView;
 import java.util.Observable;
 import java.util.Observer;
 
-public class MainActivity extends Activity implements Observer {
+public class GameActivity extends Activity implements Observer {
     private Model model;
     private TextView scoreView;
     private RatingBar lifeView;
