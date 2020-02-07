@@ -192,20 +192,20 @@ public class Fruit {
         Path rightCoverPath;
 
         if (yLength > xLength) {
-            float[] xl = {p1X, p2X, p1X - 200, p2X - 200};
+            float[] xl = {p1X, p2X, p1X - 800, p2X - 800};
             float[] yl = {p1Y, p2Y, p1Y, p2Y};
             leftCoverPath = makePath(xl, yl);
 
-            float[] xr = {p1X, p2X, p1X + 200, p2X + 200};
+            float[] xr = {p1X, p2X, p1X + 800, p2X + 800};
             float[] yr = {p1Y, p2Y, p1Y, p2Y};
             rightCoverPath = makePath(xr, yr);
         } else {
             float[] xl = {p1X, p2X, p1X, p2X};
-            float[] yl = {p1Y, p2Y, p1Y - 200, p2Y - 200};
+            float[] yl = {p1Y, p2Y, p1Y - 800, p2Y - 800};
             leftCoverPath = makePath(xl, yl);
 
             float[] xr = {p1X, p2X, p1X, p2X};
-            float[] yr = {p1Y, p2Y, p1Y + 200, p2Y + 200};
+            float[] yr = {p1Y, p2Y, p1Y + 800, p2Y + 800};
             rightCoverPath = makePath(xr, yr);
         }
 
