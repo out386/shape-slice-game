@@ -16,8 +16,8 @@ import android.graphics.Region;
  * Class that represents a Fruit. Can be split into two separate fruits.
  */
 public class Fruit {
-    private static final int[] COLOURS = {0xFF961C1C, 0xFF6B1142, 0xFF3F1672, 0xFF171F6F, 0xFF0B3D66,
-            0xFF006064, 0xFF044E41, 0xFF2A5818, 0xFFA54813, 0xFFC06B21, 0xFF83781A};
+    private static final int[] COLOURS = {0xFFC62828, 0xFFAD1457, 0xFF6A1B9A, 0xFF1565C0, 0xFF00838F,
+            0xFF058372, 0xFF358A39, 0xFF9E9D24, 0xFFD88115, 0xFFE04E21};
 
     private Path path = new Path();
     private Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
