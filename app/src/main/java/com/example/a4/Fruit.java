@@ -11,17 +11,11 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.Region;
-import android.os.SystemClock;
 
 /**
  * Class that represents a Fruit. Can be split into two separate fruits.
  */
 public class Fruit {
-    /**
-     * Intervals in milliseconds after which speed and acceleration increases
-     */
-    private static final long SCALE_INTERVAL = 10000;
-    private static final int MAX_SCALE_FACTOR = 5;
     private static final int[] COLOURS = {0xFF961C1C, 0xFF6B1142, 0xFF3F1672, 0xFF171F6F, 0xFF0B3D66,
             0xFF006064, 0xFF044E41, 0xFF2A5818, 0xFFA54813, 0xFFC06B21, 0xFF83781A};
 
@@ -40,7 +34,7 @@ public class Fruit {
      * A fruit is represented as Path, typically populated by a series of points
      */
 
-    Fruit(Path path, long gameStartTime, DimensionsModel dimens) {
+    Fruit(Path path, GameValues dimens) {
         init();
 
         this.part = false;
@@ -48,8 +42,7 @@ public class Fruit {
         this.path.reset();
         this.path = path;
 
-        long scale = (SystemClock.uptimeMillis() - gameStartTime) / SCALE_INTERVAL;
-        scale = Math.min(Math.max(1, scale), MAX_SCALE_FACTOR);
+        int scale = dimens.getScale();
         float density = dimens.getDensity();
 
         this.speedx = (float) (Math.random() * 2 - 1) * density * scale;
@@ -118,7 +111,7 @@ public class Fruit {
      * Paints the Fruit to the screen using its current affine transform and paint settings (fill,
      * outline)
      */
-    void draw(Canvas canvas, DimensionsModel dimens) {
+    void draw(Canvas canvas, GameValues dimens) {
         Region tempRegion = new Region();
         Region clip = new Region(0, 0, dimens.getW(), dimens.getH());
         tempRegion.setPath(getTransformedPath(), clip);
@@ -129,7 +122,7 @@ public class Fruit {
     /**
      * Tests whether the line represented by the two points intersects this Fruit.
      */
-    boolean intersects(PointF p1, PointF p2, DimensionsModel dimens) {
+    boolean intersects(PointF p1, PointF p2, GameValues dimens) {
         Region fruitRegion = new Region();
         Region clip = new Region(0, 0, dimens.getW(), dimens.getH());
         fruitRegion.setPath(getTransformedPath(), clip);
@@ -151,7 +144,7 @@ public class Fruit {
     /**
      * Returns whether the given point is within the Fruit's shape.
      */
-    public boolean contains(PointF p1, DimensionsModel dimens) {
+    public boolean contains(PointF p1, GameValues dimens) {
         Region region = new Region();
         Region clip = new Region(0, 0, dimens.getW(), dimens.getH());
         boolean valid = region.setPath(getTransformedPath(), clip);
@@ -163,7 +156,7 @@ public class Fruit {
      * unpredictable results will occur. Returns two new Fruits, split by the line represented by
      * the two points given.
      */
-    Fruit[] split(PointF p1, PointF p2, DimensionsModel dimens) {
+    Fruit[] split(PointF p1, PointF p2, GameValues dimens) {
 
         float xLength = Math.abs(p1.x - p2.x);
         float yLength = Math.abs(p1.y - p2.y);

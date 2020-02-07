@@ -14,7 +14,6 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
@@ -31,19 +30,15 @@ import java.util.Iterator;
  */
 @SuppressLint("ViewConstructor")
 public class MainView extends View {
-    private int addFruitInterval = (int) (Math.random() * 1000 + 1500);
-    private long lastFruitAddedTime = 0;
-    private long gameStartTime;
     private Handler handler;
     @Nullable
-    private DimensionsModel dimens;
+    private GameValues gameValues;
 
     private final Model model;
     private final MouseDrag drag = new MouseDrag();
     public Context viewContext;
 
     public boolean addCuts = false;
-    public int toAdd = 2;
     public ArrayList<Fruit> newFruits = new ArrayList();
     private DrawRunnable drawRunnable;
 
@@ -55,10 +50,9 @@ public class MainView extends View {
         handler = new Handler();
         // register this view with the model
         model = m;
-        gameStartTime = SystemClock.uptimeMillis();
 
         setOnTouchListener((v, event) -> {
-            if (dimens == null)
+            if (gameValues == null)
                 return true;
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
@@ -69,11 +63,11 @@ public class MainView extends View {
                     drag.stop(event.getX(), event.getY());
                     // find intersected shapes
                     for (Fruit s : model.getShapes()) {
-                        if (s.intersects(drag.getStart(), drag.getEnd(), dimens)) {
+                        if (s.intersects(drag.getStart(), drag.getEnd(), gameValues)) {
                             s.setFillColor(Color.RED);
 
                             try {
-                                Fruit[] goingAL = s.split(drag.getStart(), drag.getEnd(), dimens);
+                                Fruit[] goingAL = s.split(drag.getStart(), drag.getEnd(), gameValues);
                                 newFruits.addAll(Arrays.asList(goingAL));
                                 s.cutted = true;
                                 addCuts = true;
@@ -89,17 +83,15 @@ public class MainView extends View {
     }
 
     public void init() {
-        lastFruitAddedTime = 0;
-        gameStartTime = SystemClock.uptimeMillis();
         model.clear();
         drag.reset();
         addCuts = false;
-        toAdd = 2;
         newFruits = new ArrayList<>();
         //goFullscreen(((Activity) viewContext).getWindow());
         setBackgroundColor(Color.TRANSPARENT);
         invalidate();
-        if (dimens != null) {
+        if (gameValues != null) {
+            gameValues.reset();
             if (drawRunnable == null)
                 drawRunnable = new DrawRunnable();
             handler.post(drawRunnable);
@@ -109,7 +101,7 @@ public class MainView extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        dimens = new DimensionsModel(w, h, getResources().getDisplayMetrics().density);
+        gameValues = new GameValues(w, h, getResources().getDisplayMetrics().density);
         if (drawRunnable == null) {
             drawRunnable = new DrawRunnable();
             handler.post(drawRunnable);
@@ -149,12 +141,12 @@ public class MainView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if (dimens == null)
+        if (gameValues == null)
             return;
 
         // draw all pieces of fruit
         for (Fruit s : model.getShapes()) {
-            s.draw(canvas, dimens);
+            s.draw(canvas, gameValues);
         }
     }
 
@@ -162,16 +154,16 @@ public class MainView extends View {
         @Override
         public void run() {
             for (Iterator<Fruit> it = model.shapes.iterator(); it.hasNext(); ) {
-                if (dimens == null)
+                if (gameValues == null)
                     continue;
                 Fruit temp = it.next();
                 Region tempRegion = new Region();
-                Region clip = new Region(0, 0, dimens.getW(), dimens.getH());
+                Region clip = new Region(0, 0, gameValues.getW(), gameValues.getH());
                 tempRegion.setPath(temp.getTransformedPath(), clip);
 
                 Rect bounds = tempRegion.getBounds();
                 if (bounds.left < 1 && temp.speedx < 0
-                        || bounds.right > dimens.getFailThresX() && temp.speedx > 0)
+                        || bounds.right > gameValues.getFailThresX() && temp.speedx > 0)
                     temp.speedx *= -1;
 
                 temp.translate(temp.speedx, temp.speedy);
@@ -179,7 +171,7 @@ public class MainView extends View {
                 temp.speedy += temp.accy;
 
 
-                if (bounds.bottom > dimens.getFailThresY()) {
+                if (bounds.bottom > gameValues.getFailThresY()) {
                     if (!temp.part) {
                         model.life--;
                         model.notifyObs();
@@ -199,10 +191,12 @@ public class MainView extends View {
                 }
             }
 
-            setShouldAddFruit();
-            while (toAdd > 0) {
-                toAdd--;
-                addFruit();
+            if (gameValues != null) {
+                int toAdd = gameValues.numFruitsToAdd();
+                while (toAdd > 0) {
+                    toAdd--;
+                    addFruit();
+                }
             }
 
             if (addCuts) {
@@ -216,16 +210,6 @@ public class MainView extends View {
 
             // '16' will keep the frame rate at or just below 60 FPS
             handler.postDelayed(this, 16);
-        }
-    }
-
-    private void setShouldAddFruit() {
-        long currentTime = SystemClock.uptimeMillis();
-        long nextAddTime = lastFruitAddedTime + addFruitInterval;
-        if (currentTime >= nextAddTime) {
-            lastFruitAddedTime = currentTime;
-            toAdd = (int) (Math.random() * 2 + 1);
-            addFruitInterval = (int) (Math.random() * 1000 + 1500);
         }
     }
 
@@ -254,11 +238,11 @@ public class MainView extends View {
     }
 
     private void addFruit() {
-        if (dimens != null) {
+        if (gameValues != null) {
             Path newPath = new Path();
-            newPath.addCircle(dimens.getAddX(), dimens.getAddY(), dimens.getPathRadius(),
+            newPath.addCircle(gameValues.getAddX(), gameValues.getAddY(), gameValues.getPathRadius(),
                     Path.Direction.CCW);
-            Fruit f = new Fruit(newPath, gameStartTime, dimens);
+            Fruit f = new Fruit(newPath, gameValues);
             model.add(f);
         }
     }
