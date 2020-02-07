@@ -23,6 +23,7 @@ public class Fruit {
     private Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private Matrix transform = new Matrix();
     private int paintColour;
+    private boolean alreadySplit;
     float speedx;
     float speedy;
     float accx;
@@ -54,7 +55,8 @@ public class Fruit {
     }
 
     private Fruit(Path path, float sx, float sy, float accy, int colour) {
-        paintColour = colour;
+        this.paintColour = colour;
+        this.alreadySplit = true;
         this.paint.setColor(colour);
         this.paint.setStrokeWidth(5);
 
@@ -87,10 +89,6 @@ public class Fruit {
         result.moveTo(pointsx[0], pointsy[0]);
 
         return result;
-    }
-
-    void setFillColor(int color) {
-        paint.setColor(color);
     }
 
     void translate(float tx, float ty) {
@@ -142,6 +140,27 @@ public class Fruit {
     }
 
     /**
+     * Tests whether the line represented by the two points intersects this Fruit.
+     */
+    boolean intersectPoint(float oldx, float oldy, float x, float y, GameValues dimens) {
+        Region fruitRegion = new Region();
+        Region clip = new Region(0, 0, dimens.getW(), dimens.getH());
+        fruitRegion.setPath(getTransformedPath(), clip);
+
+        Path cut = new Path();
+        cut.moveTo(oldx, oldy);
+        cut.lineTo(x, y);
+        cut.lineTo(x, y - 1);
+        cut.lineTo(oldx, oldy - 1);
+        cut.moveTo(x, y);
+
+        Region cutRegion = new Region();
+        cutRegion.setPath(cut, clip);
+        return cutRegion.op(fruitRegion, Region.Op.INTERSECT);
+
+    }
+
+    /**
      * Returns whether the given point is within the Fruit's shape.
      */
     public boolean contains(PointF p1, GameValues dimens) {
@@ -157,6 +176,8 @@ public class Fruit {
      * the two points given.
      */
     Fruit[] split(PointF p1, PointF p2, GameValues dimens) {
+        if (alreadySplit)
+            return null;
 
         float xLength = Math.abs(p1.x - p2.x);
         float yLength = Math.abs(p1.y - p2.y);

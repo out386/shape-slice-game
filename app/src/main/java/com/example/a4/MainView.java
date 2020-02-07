@@ -56,23 +56,43 @@ public class MainView extends View {
                     drag.start(event.getX(), event.getY());
                     break;
 
-                case MotionEvent.ACTION_UP:
-                    drag.stop(event.getX(), event.getY());
-                    // find intersected shapes
+                case MotionEvent.ACTION_MOVE:
+                    float x = event.getX();
+                    float y = event.getY();
                     for (Fruit s : model.getShapes()) {
-                        if (s.intersects(drag.getStart(), drag.getEnd(), gameValues)) {
-                            s.setFillColor(Color.RED);
-
+                        if (s.intersectPoint(drag.lastPointx, drag.lastPointy, x, y, gameValues)) {
                             try {
-                                Fruit[] goingAL = s.split(drag.getStart(), drag.getEnd(), gameValues);
-                                newFruits.addAll(Arrays.asList(goingAL));
-                                s.cutted = true;
-                                addCuts = true;
-
+                                Fruit[] goingAL = s.split(
+                                        new PointF(drag.lastPointx, drag.lastPointy),
+                                        new PointF(x, y), gameValues);
+                                if (goingAL != null) {
+                                    newFruits.addAll(Arrays.asList(goingAL));
+                                    s.cutted = true;
+                                    addCuts = true;
+                                }
                             } catch (Exception ignored) {
                             }
                         }
                     }
+                    drag.setPoint(x, y);
+                    break;
+
+                case MotionEvent.ACTION_UP:
+                    /*drag.stop(event.getX(), event.getY());
+                    // find intersected shapes
+                    for (Fruit s : model.getShapes()) {
+                        if (s.intersects(drag.getStart(), drag.getEnd(), gameValues)) {
+                            try {
+                                Fruit[] goingAL = s.split(drag.getStart(), drag.getEnd(), gameValues);
+                                if (goingAL != null) {
+                                    newFruits.addAll(Arrays.asList(goingAL));
+                                    s.cutted = true;
+                                    addCuts = true;
+                                }
+                            } catch (Exception ignored) {
+                            }
+                        }
+                    }*/
                     break;
             }
             return true;
@@ -111,6 +131,8 @@ public class MainView extends View {
     class MouseDrag {
         private float startx, starty;
         private float endx, endy;
+        float lastPointx, lastPointy;
+        private int pointSetCount;
 
         PointF getStart() {
             return new PointF(startx, starty);
@@ -132,6 +154,14 @@ public class MainView extends View {
 
         void reset() {
             startx = starty = endx = endy = 0;
+        }
+
+        void setPoint(float x, float y) {
+            pointSetCount++;
+            if (pointSetCount % 10 ==0 || pointSetCount==1) {
+                lastPointx = x;
+                lastPointy = y;
+            }
         }
     }
 
