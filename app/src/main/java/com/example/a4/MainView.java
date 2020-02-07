@@ -4,9 +4,6 @@
 package com.example.a4;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Path;
@@ -36,7 +33,7 @@ public class MainView extends View {
 
     private final Model model;
     private final MouseDrag drag = new MouseDrag();
-    public Context viewContext;
+    public MainActivity activity;
 
     public boolean addCuts = false;
     public ArrayList<Fruit> newFruits = new ArrayList();
@@ -44,9 +41,9 @@ public class MainView extends View {
 
     // Constructor
     @SuppressLint("ClickableViewAccessibility")
-    MainView(Context context, Model m) {
-        super(context);
-        viewContext = context;
+    MainView(MainActivity activity, Model m) {
+        super(activity);
+        this.activity = activity;
         handler = new Handler();
         // register this view with the model
         model = m;
@@ -82,12 +79,12 @@ public class MainView extends View {
         });
     }
 
-    public void init() {
+    void init() {
         model.clear();
         drag.reset();
         addCuts = false;
         newFruits = new ArrayList<>();
-        //goFullscreen(((Activity) viewContext).getWindow());
+        //goFullscreen(((Activity) activity).getWindow());
         setBackgroundColor(Color.TRANSPARENT);
         invalidate();
         if (gameValues != null) {
@@ -177,7 +174,7 @@ public class MainView extends View {
                         model.notifyObs();
                         if (model.life <= 0) {
                             // Not bothering to clean up here as init() will do it soon anyway
-                            showDialog();
+                            activity.startRestartActivity();
                             return;
                         }
                     }
@@ -211,20 +208,6 @@ public class MainView extends View {
             // '16' will keep the frame rate at or just below 60 FPS
             handler.postDelayed(this, 16);
         }
-    }
-
-    private void showDialog() {
-        AlertDialog.Builder dialogBuilder =
-                new AlertDialog.Builder(viewContext);
-        dialogBuilder.setMessage("Restart?");
-        dialogBuilder.setPositiveButton("Yes", (dialog, which) -> init());
-
-        dialogBuilder.setNegativeButton("No", (dialog, which) ->
-                ((Activity) viewContext).finish());
-
-        AlertDialog dialog = dialogBuilder.create();
-        //goFullscreen(dialog.getWindow());
-        dialog.show();
     }
 
     private void goFullscreen(Window w) {
