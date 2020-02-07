@@ -210,6 +210,10 @@ public class MainView extends View {
         }
     }
 
+    void stop() {
+        handler.removeCallbacksAndMessages(null);
+    }
+
     private void goFullscreen(Window w) {
         if (w != null) {
             w.getDecorView().setSystemUiVisibility(

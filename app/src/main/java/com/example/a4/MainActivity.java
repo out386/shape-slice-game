@@ -50,9 +50,15 @@ public class MainActivity extends Activity implements Observer {
         v2.addView(mainView);
         mainView.init();
 
-
         // notify all views
         model.initObservers();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mainView.stop();
+        finish();
     }
 
     @SuppressLint("SetTextI18n")  // As if I'm planning to ever translate this
@@ -65,18 +71,9 @@ public class MainActivity extends Activity implements Observer {
     void startRestartActivity() {
         Intent i = new Intent(this, RestartActivity.class)
                 .putExtra("score", model.score);
-        startActivityForResult(i, 1);
+        startActivity(i);
         overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 1) {
-            if (resultCode == Activity.RESULT_OK)
-                mainView.init();
-            else if (resultCode == Activity.RESULT_CANCELED)
-                finish();
-        }
+        mainView.stop();
+        finish();
     }
 }
