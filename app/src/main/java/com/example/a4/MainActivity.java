@@ -27,11 +27,11 @@ public class MainActivity extends Activity implements Observer {
         model = new Model();
 
         setContentView(R.layout.main);
-        getWindow().getDecorView().setSystemUiVisibility(
+        /*getWindow().getDecorView().setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                         | View.SYSTEM_UI_FLAG_FULLSCREEN
                         | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-        );
+        );*/
     }
 
     @Override

@@ -96,7 +96,7 @@ public class MainView extends View {
         addCuts = false;
         toAdd = 2;
         newFruits = new ArrayList<>();
-        goFullscreen(((Activity) viewContext).getWindow());
+        //goFullscreen(((Activity) viewContext).getWindow());
         setBackgroundColor(Color.TRANSPARENT);
         invalidate();
         if (dimens != null) {
@@ -239,7 +239,7 @@ public class MainView extends View {
                 ((Activity) viewContext).finish());
 
         AlertDialog dialog = dialogBuilder.create();
-        goFullscreen(dialog.getWindow());
+        //goFullscreen(dialog.getWindow());
         dialog.show();
     }
 
