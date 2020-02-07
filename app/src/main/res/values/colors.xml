@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="lifeTint">#D32F2F</color>
-    <color name="scoreText">#FCFCFC</color>
-    <color name="hscoreText">#CFCFCF</color>
-    <color name="topBg">#131313</color>
-    <color name="bg">#0a0a0a</color>
-    <color name="cardStroke">#383838</color>
+    <color name="scoreText">#161616</color>
+    <color name="topBg">#E4E4E4</color>
+    <color name="bg">#EEEEEE</color>
+    <color name="cardStroke">#C5C5C5</color>
 </resources>

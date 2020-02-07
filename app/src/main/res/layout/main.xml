@@ -5,12 +5,18 @@
     android:layout_height="fill_parent"
     android:background="@color/bg">
 
-    <ImageView
+    <View
         android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg1"
+        android:alpha="0.5"/>
+
+    <ImageView
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:adjustViewBounds="true"
-        android:src="@drawable/bg"
-        android:layout_centerVertical="true" />
+        android:src="@drawable/edge_logo"
+        android:layout_centerInParent="true"/>
 
     <RelativeLayout
         android:id="@+id/top_view"
