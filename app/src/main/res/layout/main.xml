@@ -9,14 +9,14 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/bg1"
-        android:alpha="0.5"/>
+        android:alpha="0.5" />
 
     <ImageView
         android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:adjustViewBounds="true"
         android:src="@drawable/edge_logo"
-        android:layout_centerInParent="true"/>
+        android:layout_centerInParent="true" />
 
     <RelativeLayout
         android:id="@+id/top_view"
@@ -46,7 +46,6 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:numStars="5"
-            android:rating="3"
             android:stepSize="1" />
 
     </RelativeLayout>
@@ -56,7 +55,37 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/top_view"
-        android:orientation="horizontal">
+        android:orientation="horizontal" />
+
+    <LinearLayout
+        android:id="@+id/floating_view"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_centerVertical="true"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:background="@color/topBg">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:textColor="@color/scoreText"
+            android:textStyle="bold"
+            android:fontFamily="casual"
+            android:textSize="20sp"
+            android:text="@string/rules" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="20dp"
+            android:textColor="@color/lifeTint"
+            android:textStyle="bold"
+            android:fontFamily="casual"
+            android:textSize="30sp"
+            android:text="@string/begin" />
 
     </LinearLayout>
 

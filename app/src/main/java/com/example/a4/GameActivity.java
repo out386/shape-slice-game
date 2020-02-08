@@ -9,18 +9,23 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.SystemClock;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.Observable;
 import java.util.Observer;
 
 public class GameActivity extends Activity implements Observer {
+    private static final int BLOCK_BACK_THRES = 2000;
     private Model model;
     private TextView scoreView;
     private RatingBar lifeView;
     private MainView mainView;
+    private long lastBackTime;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -42,16 +47,21 @@ public class GameActivity extends Activity implements Observer {
         // create the views and add them to the main activity
         scoreView = findViewById(R.id.score);
         lifeView = findViewById(R.id.life);
+        View floatingView = findViewById(R.id.floating_view);
         lifeView.setIsIndicator(true);
         model.addObserver(this);
 
-        mainView = new MainView(this, model);
-        ViewGroup v2 = findViewById(R.id.main_2);
-        v2.addView(mainView);
-        mainView.init();
+        floatingView.setOnClickListener(view -> {
+            floatingView.setOnClickListener(null);
+            floatingView.setVisibility(View.GONE);
+            mainView = new MainView(this, model);
+            ViewGroup v2 = findViewById(R.id.main_2);
+            v2.addView(mainView);
+            mainView.init();
 
-        // notify all views
-        model.initObservers();
+            // notify all views
+            model.initObservers();
+        });
     }
 
     @Override
@@ -75,5 +85,16 @@ public class GameActivity extends Activity implements Observer {
         overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
         mainView.stop();
         finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (lastBackTime == 0 || SystemClock.uptimeMillis() - lastBackTime > BLOCK_BACK_THRES) {
+            Toast.makeText(this, "Press once again to exit", Toast.LENGTH_SHORT).show();
+            lastBackTime = SystemClock.uptimeMillis();
+        } else {
+            super.onBackPressed();
+        }
+
     }
 }
