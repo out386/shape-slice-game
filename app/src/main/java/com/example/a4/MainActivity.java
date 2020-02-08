@@ -9,18 +9,22 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.view.ViewGroup;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.Observable;
 import java.util.Observer;
 
 public class MainActivity extends Activity implements Observer {
+    private static final int BLOCK_BACK_THRES = 2000;
     private Model model;
     private TextView scoreView;
     private RatingBar lifeView;
     private MainView mainView;
+    private long lastBackTime;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -75,5 +79,16 @@ public class MainActivity extends Activity implements Observer {
         overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
         mainView.stop();
         finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (lastBackTime == 0 || SystemClock.uptimeMillis() - lastBackTime > BLOCK_BACK_THRES) {
+            Toast.makeText(this, "Press once again to exit", Toast.LENGTH_SHORT).show();
+            lastBackTime = SystemClock.uptimeMillis();
+        } else {
+            super.onBackPressed();
+        }
+
     }
 }
