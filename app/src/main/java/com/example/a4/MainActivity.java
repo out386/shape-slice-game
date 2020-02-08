@@ -10,6 +10,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -46,16 +47,21 @@ public class MainActivity extends Activity implements Observer {
         // create the views and add them to the main activity
         scoreView = findViewById(R.id.score);
         lifeView = findViewById(R.id.life);
+        View floatingView = findViewById(R.id.floating_view);
         lifeView.setIsIndicator(true);
         model.addObserver(this);
 
-        mainView = new MainView(this, model);
-        ViewGroup v2 = findViewById(R.id.main_2);
-        v2.addView(mainView);
-        mainView.init();
+        floatingView.setOnClickListener(view -> {
+            floatingView.setOnClickListener(null);
+            floatingView.setVisibility(View.GONE);
+            mainView = new MainView(this, model);
+            ViewGroup v2 = findViewById(R.id.main_2);
+            v2.addView(mainView);
+            mainView.init();
 
-        // notify all views
-        model.initObservers();
+            // notify all views
+            model.initObservers();
+        });
     }
 
     @Override
