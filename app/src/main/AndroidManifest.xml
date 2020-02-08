@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.a4">
 
+    <uses-permission android:name="android.permission.VIBRATE" />
     <application
         android:icon="@drawable/ic_launcher"
         tools:ignore="GoogleAppIndexingWarning">
@@ -14,7 +15,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".RestartActivity"
-            android:theme="@style/AppTheme"/>
+        <activity
+            android:name=".RestartActivity"
+            android:theme="@style/AppTheme" />
     </application>
 </manifest>

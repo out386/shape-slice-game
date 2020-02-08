@@ -38,6 +38,7 @@ public class MainView extends View {
     public boolean addCuts = false;
     public ArrayList<Fruit> newFruits = new ArrayList();
     private DrawRunnable drawRunnable;
+    private EffectsPlayer effectsPlayer;
 
     // Constructor
     @SuppressLint("ClickableViewAccessibility")
@@ -45,6 +46,7 @@ public class MainView extends View {
         super(activity);
         this.activity = activity;
         handler = new Handler();
+        effectsPlayer = new EffectsPlayer(activity);
         // register this view with the model
         model = m;
 
@@ -68,7 +70,7 @@ public class MainView extends View {
                                 newFruits.addAll(Arrays.asList(goingAL));
                                 s.cutted = true;
                                 addCuts = true;
-
+                                effectsPlayer.play();
                             } catch (Exception ignored) {
                             }
                         }
@@ -170,6 +172,7 @@ public class MainView extends View {
 
                 if (bounds.bottom > gameValues.getFailThresY()) {
                     if (!temp.part) {
+                        effectsPlayer.vibrate();
                         model.life--;
                         model.notifyObs();
                         if (model.life <= 0) {
@@ -212,6 +215,7 @@ public class MainView extends View {
 
     void stop() {
         handler.removeCallbacksAndMessages(null);
+        effectsPlayer.destroy();
     }
 
     private void goFullscreen(Window w) {
