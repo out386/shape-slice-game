@@ -67,7 +67,8 @@ public class GameActivity extends Activity implements Observer {
     @Override
     protected void onStop() {
         super.onStop();
-        mainView.stop();
+        if (mainView != null)
+            mainView.stop();
         finish();
     }
 
