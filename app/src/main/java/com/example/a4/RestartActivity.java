@@ -10,8 +10,9 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 
-public class RestartActivity extends Activity {
+public class RestartActivity extends AppCompatActivity {
     @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -38,7 +39,7 @@ public class RestartActivity extends Activity {
         hScoreTv.setText("Your highscore: " + hscore);
 
         yesButton.setOnClickListener(view -> {
-            startActivity(new Intent(this,  GameActivity.class));
+            startActivity(new Intent(this, GameActivity.class));
             overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
             finish();
         });

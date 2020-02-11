@@ -7,9 +7,9 @@
     <application tools:ignore="GoogleAppIndexingWarning">
         <activity
             android:name=".GameActivity"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/GameTheme" />
         <activity
             android:name=".RestartActivity"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/GameTheme" />
     </application>
 </manifest>

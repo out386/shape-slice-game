@@ -6,20 +6,23 @@
 package com.example.a4;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import java.util.Observable;
 import java.util.Observer;
 
-public class GameActivity extends Activity implements Observer {
+public class GameActivity extends AppCompatActivity implements Observer {
     private static final int BLOCK_BACK_THRES = 2000;
     private Model model;
     private TextView scoreView;
@@ -33,11 +36,6 @@ public class GameActivity extends Activity implements Observer {
         model = new Model();
 
         setContentView(R.layout.main);
-        /*getWindow().getDecorView().setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                        | View.SYSTEM_UI_FLAG_FULLSCREEN
-                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-        );*/
     }
 
     @Override
