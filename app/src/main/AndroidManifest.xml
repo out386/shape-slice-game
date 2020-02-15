@@ -7,7 +7,12 @@
     <application tools:ignore="GoogleAppIndexingWarning">
         <activity
             android:name=".GameActivity"
-            android:theme="@style/GameTheme" />
+            android:theme="@style/GameTheme">
+            <intent-filter>
+                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".RestartActivity"
             android:theme="@style/GameTheme" />
