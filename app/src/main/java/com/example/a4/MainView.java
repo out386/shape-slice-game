@@ -4,15 +4,17 @@
 package com.example.a4;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Path;
 import android.graphics.PointF;
-import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.Region;
-import android.os.Handler;
+import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.Window;
 
@@ -27,29 +29,43 @@ import java.util.LinkedList;
  * Displays pieces of fruit, and allows players to slice them.
  */
 @SuppressLint("ViewConstructor")
-public class MainView extends View {
-    private Handler handler;
+public class MainView extends SurfaceView implements Runnable {
+    private boolean isRunning;
+    private Thread drawThread;
+    private SurfaceHolder surfaceHolder;
     @Nullable
     private GameValues gameValues;
 
-    private final Model model;
+    private Model model;
     private final MouseDrag drag = new MouseDrag();
     public GameActivity activity;
 
     public boolean addCuts = false;
     public LinkedList<Fruit> newFruits = new LinkedList<>();
-    private DrawRunnable drawRunnable;
     private EffectsPlayer effectsPlayer;
 
-    // Constructor
+
+    public MainView(Context context) {
+        super(context);
+        init();
+    }
+
+    public MainView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        init();
+    }
+
+    public MainView(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        init();
+    }
+
+
     @SuppressLint("ClickableViewAccessibility")
-    MainView(GameActivity activity, Model m) {
-        super(activity);
-        this.activity = activity;
-        handler = new Handler();
-        effectsPlayer = new EffectsPlayer(activity);
-        // register this view with the model
-        model = m;
+    private void init() {
+        model = new Model();
+        drawThread = new Thread(this);
+        surfaceHolder = getHolder();
 
         setOnTouchListener((v, event) -> {
             if (gameValues == null)
@@ -62,27 +78,19 @@ public class MainView extends View {
                 case MotionEvent.ACTION_UP:
                     drag.stop(event.getX(), event.getY());
                     // find intersected shapes
-                    PointF start = drag.getStart();
-                    PointF end = drag.getEnd();
-                    for (Fruit s : model.getShapes()) {
-                        if (Fruit.intersects(s, start, end, gameValues)) {
-                            try {
-                                Fruit[] goingAL = Fruit.split(s, start, end, gameValues);
-                                newFruits.addAll(Arrays.asList(goingAL));
-                                s.cutted = true;
-                                addCuts = true;
-                                effectsPlayer.play();
-                            } catch (Exception ignored) {
-                            }
-                        }
-                    }
                     break;
             }
             return true;
         });
     }
 
-    void init() {
+    Model getModel() {
+        return model;
+    }
+
+    void init(GameActivity activity) {
+        this.activity = activity;
+        effectsPlayer = new EffectsPlayer(activity);
         model.clear();
         drag.reset();
         addCuts = false;
@@ -92,19 +100,20 @@ public class MainView extends View {
         invalidate();
         if (gameValues != null) {
             gameValues.reset();
-            if (drawRunnable == null)
-                drawRunnable = new DrawRunnable();
-            handler.post(drawRunnable);
+            if (!isRunning) {
+                isRunning = true;
+                drawThread.start();
+            }
         }
     }
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        gameValues = new GameValues(w, h, getResources().getDisplayMetrics().density);
-        if (drawRunnable == null) {
-            drawRunnable = new DrawRunnable();
-            handler.post(drawRunnable);
+        gameValues = new GameValues(getContext(), w, h, getResources().getDisplayMetrics().density);
+        if (!isRunning) {
+            isRunning = true;
+            drawThread.start();
         }
     }
 
@@ -126,6 +135,8 @@ public class MainView extends View {
         void start(float x, float y) {
             this.startx = x;
             this.starty = y;
+            this.endx = 0;
+            this.endy = 0;
         }
 
         void stop(float x, float y) {
@@ -138,24 +149,41 @@ public class MainView extends View {
         }
     }
 
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
+    private void findIntersects() {
         if (gameValues == null)
             return;
-
-        // draw all pieces of fruit
+        PointF start = drag.getStart();
+        PointF end = drag.getEnd();
+        if (start.x == 0 || end.x == 0) // drag in progress or not started
+            return;
+        drag.reset();
         for (Fruit s : model.getShapes()) {
-            Fruit.draw(s, canvas, gameValues);
+            if (Fruit.intersects(s, start, end, gameValues)) {
+                try {
+                    Fruit[] goingAL = Fruit.split(s, start, end, gameValues);
+                    newFruits.addAll(Arrays.asList(goingAL));
+                    s.cutted = true;
+                    addCuts = true;
+                    effectsPlayer.play();
+                } catch (Exception ignored) {
+                }
+            }
         }
     }
 
-    class DrawRunnable implements Runnable {
-        @Override
-        public void run() {
+    @Override
+    public void run() {
+        while (isRunning && !Thread.currentThread().isInterrupted()) {
+            if (!surfaceHolder.getSurface().isValid()) {
+                continue;
+            }
+
+            findIntersects();
+
             for (Iterator<Fruit> it = model.getShapes().iterator(); it.hasNext(); ) {
-                if (gameValues == null)
+                if (gameValues == null) {
                     continue;
+                }
                 Fruit temp = it.next();
 
                 RectF bounds = new RectF();
@@ -176,8 +204,9 @@ public class MainView extends View {
                         model.life--;
                         model.notifyObs();
                         if (model.life <= 0) {
-                            // Not bothering to clean up here as init() will do it soon anyway
-                            activity.startRestartActivity();
+                            if (activity != null)
+                                // Not bothering to clean up here as init() will do it soon anyway
+                                activity.startRestartActivity();
                             return;
                         }
                     }
@@ -205,15 +234,39 @@ public class MainView extends View {
                 addCuts = false;
                 newFruits.clear();
             }
-            invalidate();
-
-            // '16' will keep the frame rate at or just below 60 FPS
-            handler.postDelayed(this, 16);
+            drawScene();
         }
     }
 
+    private void drawScene() {
+        Canvas canvas = surfaceHolder.lockCanvas();
+        if (canvas != null) {
+            if (gameValues != null) {
+                drawBg(canvas);
+                // draw all pieces of fruit
+                for (Fruit s : model.getShapes()) {
+                    Fruit.draw(s, canvas, gameValues);
+                }
+            }
+            surfaceHolder.unlockCanvasAndPost(canvas);
+        }
+    }
+
+    private void drawBg(Canvas canvas) {
+        @SuppressWarnings("ConstantConditions")
+        Bitmap b = gameValues.getEdgeLogo();
+        Bitmap tileBg = gameValues.getTileBg();
+        if (tileBg != null)
+            canvas.drawBitmap(tileBg, 0, 0, null);
+        if (b != null)
+            canvas.drawBitmap(b, gameValues.getEdgeLogoPosX(), gameValues.getEdgeLogoPosY(), null);
+    }
+
     void stop() {
-        handler.removeCallbacksAndMessages(null);
+        isRunning = false;
+        if (drawThread != null) {
+            drawThread.interrupt();
+        }
         effectsPlayer.destroy();
     }
 
