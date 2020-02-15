@@ -1,5 +1,6 @@
 package com.example.a4;
 
+import android.graphics.Region;
 import android.os.SystemClock;
 
 class GameValues {
@@ -19,6 +20,7 @@ class GameValues {
     private long gameStartTime;
     private int addFruitInterval;
     private long lastFruitAddedTime;
+    private Region clipRegion;
 
     GameValues(int viewW, int viewH, float density) {
         this.viewW = viewW;
@@ -28,6 +30,7 @@ class GameValues {
         basePathRadius = 30 * density;
         failThresY = viewH - 1;
         failThresX = viewW - 1;
+        clipRegion = new Region(0, 0, viewW, viewH);
         reset();
     }
 
@@ -61,6 +64,10 @@ class GameValues {
 
     float getPathRadius() {
         return basePathRadius + (int) (Math.random() * 6 * density);
+    }
+
+    Region getClipRegion() {
+        return clipRegion;
     }
 
     void reset() {

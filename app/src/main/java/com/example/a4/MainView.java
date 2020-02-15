@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.Handler;
 import android.view.MotionEvent;
@@ -17,9 +18,9 @@ import android.view.Window;
 
 import androidx.annotation.Nullable;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedList;
 
 /*
  * View of the main game area.
@@ -36,7 +37,7 @@ public class MainView extends View {
     public GameActivity activity;
 
     public boolean addCuts = false;
-    public ArrayList<Fruit> newFruits = new ArrayList();
+    public LinkedList<Fruit> newFruits = new LinkedList<>();
     private DrawRunnable drawRunnable;
     private EffectsPlayer effectsPlayer;
 
@@ -61,12 +62,12 @@ public class MainView extends View {
                 case MotionEvent.ACTION_UP:
                     drag.stop(event.getX(), event.getY());
                     // find intersected shapes
+                    PointF start = drag.getStart();
+                    PointF end = drag.getEnd();
                     for (Fruit s : model.getShapes()) {
-                        if (s.intersects(drag.getStart(), drag.getEnd(), gameValues)) {
-                            s.setFillColor(Color.RED);
-
+                        if (Fruit.intersects(s, start, end, gameValues)) {
                             try {
-                                Fruit[] goingAL = s.split(drag.getStart(), drag.getEnd(), gameValues);
+                                Fruit[] goingAL = Fruit.split(s, start, end, gameValues);
                                 newFruits.addAll(Arrays.asList(goingAL));
                                 s.cutted = true;
                                 addCuts = true;
@@ -85,7 +86,7 @@ public class MainView extends View {
         model.clear();
         drag.reset();
         addCuts = false;
-        newFruits = new ArrayList<>();
+        newFruits = new LinkedList<>();
         //goFullscreen(((Activity) activity).getWindow());
         setBackgroundColor(Color.TRANSPARENT);
         invalidate();
@@ -145,27 +146,26 @@ public class MainView extends View {
 
         // draw all pieces of fruit
         for (Fruit s : model.getShapes()) {
-            s.draw(canvas, gameValues);
+            Fruit.draw(s, canvas, gameValues);
         }
     }
 
     class DrawRunnable implements Runnable {
         @Override
         public void run() {
-            for (Iterator<Fruit> it = model.shapes.iterator(); it.hasNext(); ) {
+            for (Iterator<Fruit> it = model.getShapes().iterator(); it.hasNext(); ) {
                 if (gameValues == null)
                     continue;
                 Fruit temp = it.next();
-                Region tempRegion = new Region();
-                Region clip = new Region(0, 0, gameValues.getW(), gameValues.getH());
-                tempRegion.setPath(temp.getTransformedPath(), clip);
 
-                Rect bounds = tempRegion.getBounds();
-                if (bounds.left < 1 && temp.speedx < 0
+                RectF bounds = new RectF();
+                temp.getCurrentPath().computeBounds(bounds, true);
+
+                if (bounds.left < 0 && temp.speedx < 0
                         || bounds.right > gameValues.getFailThresX() && temp.speedx > 0)
                     temp.speedx *= -1;
 
-                temp.translate(temp.speedx, temp.speedy);
+                Fruit.translate(temp, temp.speedx, temp.speedy);
                 temp.speedx += temp.accx;
                 temp.speedy += temp.accy;
 
@@ -193,8 +193,7 @@ public class MainView extends View {
 
             if (gameValues != null) {
                 int toAdd = gameValues.numFruitsToAdd();
-                while (toAdd > 0) {
-                    toAdd--;
+                while (toAdd-- > 0) {
                     addFruit();
                 }
             }

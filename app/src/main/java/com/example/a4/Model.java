@@ -5,7 +5,8 @@
  */
 package com.example.a4;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -16,19 +17,19 @@ import java.util.Observer;
  */
 public class Model extends Observable {
     // List of fruit that we want to display
-    ArrayList<Fruit> shapes;
+    private LinkedList<Fruit> shapes;
     int score;
     int life;
 
     // Constructor
     Model() {
-        shapes = new ArrayList<>();
+        shapes = new LinkedList<>();
         score = 0;
         life = 5;
     }
 
     void clear() {
-        shapes = new ArrayList<>();
+        shapes = new LinkedList<>();
         score = 0;
         life = 5;
         initObservers();
@@ -50,8 +51,8 @@ public class Model extends Observable {
         shapes.remove(s);
     }
 
-    ArrayList<Fruit> getShapes() {
-        return (ArrayList<Fruit>) shapes.clone();
+    List<Fruit> getShapes() {
+        return shapes;
     }
 
     // MVC methods

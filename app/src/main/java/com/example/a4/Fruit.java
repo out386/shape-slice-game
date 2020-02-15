@@ -19,7 +19,8 @@ public class Fruit {
     private static final int[] COLOURS = {0xFFC62828, 0xFFAD1457, 0xFF6A1B9A, 0xFF1565C0, 0xFF00838F,
             0xFF058372, 0xFF358A39, 0xFF9E9D24, 0xFFD88115, 0xFFE04E21};
 
-    private Path path = new Path();
+    private Path originalPath;
+    private Path currentPath;
     private Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private Matrix transform = new Matrix();
     private int paintColour;
@@ -35,50 +36,44 @@ public class Fruit {
      */
 
     Fruit(Path path, GameValues dimens) {
-        init();
+        paintColour = COLOURS[(int) (Math.random() * COLOURS.length)];
+        paint.setColor(paintColour);
+        paint.setStrokeWidth(5);
 
-        this.part = false;
-
-        this.path.reset();
-        this.path = path;
+        part = false;
+        originalPath = path;
+        currentPath = new Path();
 
         int scale = dimens.getScale();
         float density = dimens.getDensity();
 
-        this.speedx = (float) (Math.random() * 2 - 1) * density * scale;
+        speedx = (float) (Math.random() * 2 - 1) * density * scale;
 
-        this.speedy = (float) -(Math.random() * 2 + 3) * density * scale;
-        this.accx = 0;
-        this.accy = (float) 0.1125 * density * scale;
-        this.cutted = false;
+        speedy = (float) -(Math.random() * 2 + 3) * density * scale;
+        accx = 0;
+        accy = (float) 0.1125 * density * scale;
+        cutted = false;
     }
 
     private Fruit(Path path, float sx, float sy, float accy, int colour) {
         paintColour = colour;
-        this.paint.setColor(colour);
-        this.paint.setStrokeWidth(5);
+        paint.setColor(colour);
+        paint.setStrokeWidth(5);
 
-        this.part = true;
+        part = true;
+        originalPath = path;
+        currentPath = new Path(path);
 
-        this.path.reset();
-        this.path = path;
+        speedx = sx;
 
-        this.speedx = sx;
+        speedy = sy;
 
-        this.speedy = sy;
-
-        this.accx = 0;
+        accx = 0;
         this.accy = accy;
-        this.cutted = false;
+        cutted = false;
     }
 
-    private void init() {
-        paintColour = COLOURS[(int) (Math.random() * COLOURS.length)];
-        this.paint.setColor(paintColour);
-        this.paint.setStrokeWidth(5);
-    }
-
-    private Path makePath(float[] pointsx, float[] pointsy) {
+    private static Path makePath(float[] pointsx, float[] pointsy) {
         Path result = new Path();
         result.moveTo(pointsx[0], pointsy[0]);
         for (int i = 1; i < pointsx.length; i += 1) {
@@ -89,43 +84,32 @@ public class Fruit {
         return result;
     }
 
-    void setFillColor(int color) {
-        paint.setColor(color);
+    static void setFillColor(Fruit fruit, int color) {
+        fruit.paint.setColor(color);
     }
 
-    void translate(float tx, float ty) {
-        transform.postTranslate(tx, ty);
-    }
-
-    /**
-     * The path used to describe the fruit shape.
-     */
-    Path getTransformedPath() {
-        Path originalPath = new Path(path);
-        Path transformedPath = new Path();
-        originalPath.transform(transform, transformedPath);
-        return transformedPath;
+    static void translate(Fruit fruit, float tx, float ty) {
+        fruit.transform.postTranslate(tx, ty);
+        fruit.originalPath.transform(fruit.transform, fruit.currentPath);
     }
 
     /**
      * Paints the Fruit to the screen using its current affine transform and paint settings (fill,
      * outline)
      */
-    void draw(Canvas canvas, GameValues dimens) {
+    static void draw(Fruit fruit, Canvas canvas, GameValues dimens) {
         Region tempRegion = new Region();
-        Region clip = new Region(0, 0, dimens.getW(), dimens.getH());
-        tempRegion.setPath(getTransformedPath(), clip);
+        tempRegion.setPath(fruit.currentPath, dimens.getClipRegion());
 
-        canvas.drawPath(getTransformedPath(), paint);
+        canvas.drawPath(fruit.currentPath, fruit.paint);
     }
 
     /**
      * Tests whether the line represented by the two points intersects this Fruit.
      */
-    boolean intersects(PointF p1, PointF p2, GameValues dimens) {
+    static boolean intersects(Fruit fruit, PointF p1, PointF p2, GameValues dimens) {
         Region fruitRegion = new Region();
-        Region clip = new Region(0, 0, dimens.getW(), dimens.getH());
-        fruitRegion.setPath(getTransformedPath(), clip);
+        fruitRegion.setPath(fruit.currentPath, dimens.getClipRegion());
 
         Path cut = new Path();
         cut.moveTo(p1.x, p1.y);
@@ -136,19 +120,21 @@ public class Fruit {
 
 
         Region cutRegion = new Region();
-        cutRegion.setPath(cut, clip);
+        cutRegion.setPath(cut, dimens.getClipRegion());
         return cutRegion.op(fruitRegion, Region.Op.INTERSECT);
-
     }
 
     /**
      * Returns whether the given point is within the Fruit's shape.
      */
-    public boolean contains(PointF p1, GameValues dimens) {
+    public static boolean contains(Fruit fruit, PointF p1, GameValues dimens) {
         Region region = new Region();
-        Region clip = new Region(0, 0, dimens.getW(), dimens.getH());
-        boolean valid = region.setPath(getTransformedPath(), clip);
+        boolean valid = region.setPath(fruit.currentPath, dimens.getClipRegion());
         return valid && region.contains((int) p1.x, (int) p1.y);
+    }
+
+    Path getCurrentPath() {
+        return currentPath;
     }
 
     /**
@@ -156,7 +142,7 @@ public class Fruit {
      * unpredictable results will occur. Returns two new Fruits, split by the line represented by
      * the two points given.
      */
-    Fruit[] split(PointF p1, PointF p2, GameValues dimens) {
+    static Fruit[] split(Fruit fruit, PointF p1, PointF p2, GameValues dimens) {
 
         float xLength = Math.abs(p1.x - p2.x);
         float yLength = Math.abs(p1.y - p2.y);
@@ -209,15 +195,14 @@ public class Fruit {
             rightCoverPath = makePath(xr, yr);
         }
 
-        Region clip = new Region(0, 0, dimens.getW(), dimens.getH());
         Region leftRegion = new Region();
         Region rightRegion = new Region();
 
-        leftRegion.setPath(leftCoverPath, clip);
-        rightRegion.setPath(rightCoverPath, clip);
+        leftRegion.setPath(leftCoverPath, dimens.getClipRegion());
+        rightRegion.setPath(rightCoverPath, dimens.getClipRegion());
 
         Region thisRegion = new Region();
-        thisRegion.setPath(getTransformedPath(), clip);
+        thisRegion.setPath(fruit.currentPath, dimens.getClipRegion());
 
         boolean resultl = leftRegion.op(thisRegion, Region.Op.INTERSECT);
         boolean resultr = rightRegion.op(thisRegion, Region.Op.INTERSECT);
@@ -226,8 +211,8 @@ public class Fruit {
         Path rightPath = rightRegion.getBoundaryPath();
 
         if (resultl && resultr) {
-            return new Fruit[]{new Fruit(leftPath, -2, speedy, accy, paintColour),
-                    new Fruit(rightPath, 2, speedy, accy, paintColour)};
+            return new Fruit[]{new Fruit(leftPath, -2, fruit.speedy, fruit.accy, fruit.paintColour),
+                    new Fruit(rightPath, 2, fruit.speedy, fruit.accy, fruit.paintColour)};
         }
         return new Fruit[0];
     }
