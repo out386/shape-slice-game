@@ -97,7 +97,7 @@ class GameValues {
     }
 
     float getAddX() {
-        return (float) (Math.random() * viewW);
+        return (float) Math.max(basePathRadius, Math.random() * viewW - basePathRadius);
     }
 
     float getPathRadius() {
