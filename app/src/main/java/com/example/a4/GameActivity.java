@@ -31,8 +31,6 @@ public class GameActivity extends AppCompatActivity implements Observer {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        model = new Model();
-
         setContentView(R.layout.main);
     }
 
@@ -45,15 +43,16 @@ public class GameActivity extends AppCompatActivity implements Observer {
         lifeView = findViewById(R.id.life);
         View floatingView = findViewById(R.id.floating_view);
         lifeView.setIsIndicator(true);
-        model.addObserver(this);
 
         floatingView.setOnClickListener(view -> {
             floatingView.setOnClickListener(null);
             floatingView.setVisibility(View.GONE);
-            mainView = new MainView(this, model);
+            mainView = new MainView(this);
+            model = mainView.getModel();
+            model.addObserver(this);
             ViewGroup v2 = findViewById(R.id.main_2);
             v2.addView(mainView);
-            mainView.init();
+            mainView.init(this);
 
             // notify all views
             model.initObservers();
@@ -71,17 +70,21 @@ public class GameActivity extends AppCompatActivity implements Observer {
     @SuppressLint("SetTextI18n")  // As if I'm planning to ever translate this
     @Override
     public void update(Observable o, Object arg) {
-        scoreView.setText("Score: " + model.score);
-        lifeView.setRating(model.life);
+        runOnUiThread(() -> {
+            scoreView.setText("Score: " + model.score);
+            lifeView.setRating(model.life);
+        });
     }
 
     void startRestartActivity() {
-        Intent i = new Intent(this, RestartActivity.class)
-                .putExtra("score", model.score);
-        startActivity(i);
-        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
-        mainView.stop();
-        finish();
+        runOnUiThread(() -> {
+            Intent i = new Intent(this, RestartActivity.class)
+                    .putExtra("score", model.score);
+            startActivity(i);
+            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+            mainView.stop();
+            finish();
+        });
     }
 
     @Override
