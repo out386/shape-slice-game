@@ -151,8 +151,8 @@ public class Fruit {
         float sin = xLength / length;
         float cos = yLength / length;
 
-        float xPlus = 100 * sin;
-        float yPlus = 100 * cos;
+        float xPlus = 150 * sin;
+        float yPlus = 150 * cos;
 
         float p1X = p1.x;
         float p1Y = p1.y;
@@ -178,20 +178,20 @@ public class Fruit {
         Path rightCoverPath;
 
         if (yLength > xLength) {
-            float[] xl = {p1X, p2X, p1X - 800, p2X - 800};
+            float[] xl = {p1X, p2X, p1X - 900, p2X - 900};
             float[] yl = {p1Y, p2Y, p1Y, p2Y};
             leftCoverPath = makePath(xl, yl);
 
-            float[] xr = {p1X, p2X, p1X + 800, p2X + 800};
+            float[] xr = {p1X, p2X, p1X + 900, p2X + 900};
             float[] yr = {p1Y, p2Y, p1Y, p2Y};
             rightCoverPath = makePath(xr, yr);
         } else {
             float[] xl = {p1X, p2X, p1X, p2X};
-            float[] yl = {p1Y, p2Y, p1Y - 800, p2Y - 800};
+            float[] yl = {p1Y, p2Y, p1Y - 900, p2Y - 900};
             leftCoverPath = makePath(xl, yl);
 
             float[] xr = {p1X, p2X, p1X, p2X};
-            float[] yr = {p1Y, p2Y, p1Y + 800, p2Y + 800};
+            float[] yr = {p1Y, p2Y, p1Y + 900, p2Y + 900};
             rightCoverPath = makePath(xr, yr);
         }
 
