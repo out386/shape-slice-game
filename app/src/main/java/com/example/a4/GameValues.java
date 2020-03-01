@@ -148,14 +148,16 @@ class GameValues {
 
         Bitmap b = Bitmap.createBitmap(bitmap, 0, 0, currentWidth, currentHeight,
                 matrix, true);
-        bitmap.recycle();
+        if (b != bitmap)
+            bitmap.recycle();
         return b;
     }
 
     private Bitmap scaleBitmap(Bitmap bitmap, int scaleSize, int width, int height) {
         Bitmap b = scaleBitmap(bitmap, scaleSize);
         Bitmap resizedBitmap = Bitmap.createBitmap(b, 0, 0, width, height);
-        b.recycle();
+        if (b != bitmap)
+            b.recycle();
         return resizedBitmap;
     }
 }
