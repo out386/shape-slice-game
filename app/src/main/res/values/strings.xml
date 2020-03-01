@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="rules">Swipe the circles to score points</string>
+    <string name="rules">Swipe from above the circles to below them to score points.</string>
+    <string name="tip">(Tip: use index fingers of both hands in the later levels)</string>
     <string name="begin">Tap to begin</string>
 </resources>
