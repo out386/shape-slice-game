@@ -56,6 +56,7 @@
         android:layout_centerVertical="true"
         android:orientation="vertical"
         android:gravity="center"
+        android:padding="8dp"
         android:background="@color/topBg">
 
         <TextView
@@ -65,8 +66,18 @@
             android:textColor="@color/scoreText"
             android:textStyle="bold"
             android:fontFamily="casual"
-            android:textSize="20sp"
+            android:textSize="18sp"
             android:text="@string/rules" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:textColor="@color/scoreText"
+            android:fontFamily="casual"
+            android:layout_marginTop="4dp"
+            android:textSize="14sp"
+            android:text="@string/tip" />
 
         <TextView
             android:layout_width="wrap_content"
